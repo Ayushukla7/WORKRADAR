@@ -5,7 +5,7 @@ import axios from 'axios';
  * Automatically attaches Authorization header if JWT token is stored in localStorage.
  */
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: `${import.meta.env.VITE_API_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,9 +15,11 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('workradar_token');
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
   (error) => {
@@ -34,6 +36,7 @@ api.interceptors.response.use(
       localStorage.removeItem('workradar_token');
       localStorage.removeItem('workradar_user');
     }
+
     return Promise.reject(error);
   }
 );
