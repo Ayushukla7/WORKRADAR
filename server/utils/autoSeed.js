@@ -8,19 +8,37 @@ const { calculateTaskRisk } = require('../services/riskEngine');
 
 /**
  * Auto-seeds demo data if database is currently empty.
- * Ensures demo credentials work 100% of the time on server start.
+ * Also updates legacy user names (e.g. Sarah Connor -> Pooja Sharma, Ayush Sharma -> Ayush) on existing DBs.
  */
 const autoSeedIfEmpty = async () => {
   try {
+    // 1. Migration for existing DB users with legacy names
+    await User.updateMany(
+      { email: 'manager@workradar.io', name: { $ne: 'Pooja Sharma' } },
+      { $set: { name: 'Pooja Sharma' } }
+    );
+    await User.updateMany(
+      { email: 'ayush@workradar.io', name: { $ne: 'Ayush' } },
+      { $set: { name: 'Ayush' } }
+    );
+    await User.updateMany(
+      { email: 'rahul@workradar.io', name: { $ne: 'Rahul' } },
+      { $set: { name: 'Rahul' } }
+    );
+    await User.updateMany(
+      { email: 'priya@workradar.io', name: { $ne: 'Priya' } },
+      { $set: { name: 'Priya' } }
+    );
+
     const userCount = await User.countDocuments();
     if (userCount > 0) {
-      console.log(`[Auto-Seed] Database already contains ${userCount} users. Skipping auto-seed.`);
+      console.log(`[Auto-Seed] Database contains ${userCount} users. Legacy names updated.`);
       return;
     }
 
     console.log('[Auto-Seed] Database is empty. Seeding realistic demo managers, developers, and projects...');
 
-    // Create Manager (Indian Name: Pooja Sharma)
+    // Create Manager (Pooja Sharma)
     const manager = await User.create({
       name: 'Pooja Sharma',
       email: 'manager@workradar.io',
@@ -192,7 +210,7 @@ const autoSeedIfEmpty = async () => {
       },
     ]);
 
-    console.log('[Auto-Seed] ✅ Auto-seeding completed successfully! Indian demo accounts are ready.');
+    console.log('[Auto-Seed] ✅ Auto-seeding completed successfully!');
   } catch (error) {
     console.error('[Auto-Seed Error]:', error.message);
   }
