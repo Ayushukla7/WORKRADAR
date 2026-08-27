@@ -127,7 +127,7 @@ const Login = () => {
                 className="w-full p-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-left text-xs transition flex justify-between items-center group"
               >
                 <div>
-                  <span className="font-bold text-slate-900">Sarah Connor</span>
+                  <span className="font-bold text-slate-900">Pooja Sharma</span>
                   <span className="text-[10px] text-slate-500 block font-mono">manager@workradar.io</span>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-mono">
@@ -140,7 +140,7 @@ const Login = () => {
                 className="w-full p-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-left text-xs transition flex justify-between items-center group"
               >
                 <div>
-                  <span className="font-bold text-slate-900">Ayush Sharma</span>
+                  <span className="font-bold text-slate-900">Ayush</span>
                   <span className="text-[10px] text-slate-500 block font-mono">ayush@workradar.io</span>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-mono">

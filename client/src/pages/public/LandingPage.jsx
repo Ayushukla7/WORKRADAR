@@ -77,7 +77,7 @@ const LandingPage = () => {
               className="p-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition text-left flex flex-col justify-between space-y-1 shadow-xs"
             >
               <span className="text-[10px] text-slate-400 font-mono uppercase">Manager Portal</span>
-              <span className="font-extrabold text-sm">Sarah Connor</span>
+              <span className="font-extrabold text-sm">Pooja Sharma</span>
             </button>
 
             <button
@@ -85,7 +85,7 @@ const LandingPage = () => {
               className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-200 rounded-xl text-xs font-bold transition text-left flex flex-col justify-between space-y-1"
             >
               <span className="text-[10px] text-slate-500 font-mono uppercase">Developer Portal</span>
-              <span className="font-extrabold text-sm">Ayush Sharma</span>
+              <span className="font-extrabold text-sm">Ayush</span>
             </button>
           </div>
         </div>

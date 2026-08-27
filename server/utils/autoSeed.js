@@ -20,9 +20,9 @@ const autoSeedIfEmpty = async () => {
 
     console.log('[Auto-Seed] Database is empty. Seeding realistic demo managers, developers, and projects...');
 
-    // Create Manager
+    // Create Manager (Indian Name: Pooja Sharma)
     const manager = await User.create({
-      name: 'Sarah Connor',
+      name: 'Pooja Sharma',
       email: 'manager@workradar.io',
       password: 'Password123!',
       role: 'MANAGER',
@@ -30,9 +30,9 @@ const autoSeedIfEmpty = async () => {
       weeklyCapacityHours: 40,
     });
 
-    // Create Developers
+    // Create Developers (Ayush, Rahul, Priya)
     const devAyush = await User.create({
-      name: 'Ayush Sharma',
+      name: 'Ayush',
       email: 'ayush@workradar.io',
       password: 'Password123!',
       role: 'EMPLOYEE',
@@ -41,7 +41,7 @@ const autoSeedIfEmpty = async () => {
     });
 
     const devRahul = await User.create({
-      name: 'Rahul Verma',
+      name: 'Rahul',
       email: 'rahul@workradar.io',
       password: 'Password123!',
       role: 'EMPLOYEE',
@@ -50,7 +50,7 @@ const autoSeedIfEmpty = async () => {
     });
 
     const devPriya = await User.create({
-      name: 'Priya Patel',
+      name: 'Priya',
       email: 'priya@workradar.io',
       password: 'Password123!',
       role: 'EMPLOYEE',
@@ -192,7 +192,7 @@ const autoSeedIfEmpty = async () => {
       },
     ]);
 
-    console.log('[Auto-Seed] ✅ Auto-seeding completed successfully! Demo accounts are ready.');
+    console.log('[Auto-Seed] ✅ Auto-seeding completed successfully! Indian demo accounts are ready.');
   } catch (error) {
     console.error('[Auto-Seed Error]:', error.message);
   }

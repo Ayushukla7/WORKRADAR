@@ -26,9 +26,9 @@ const seedDatabase = async () => {
 
     console.log('[Seed Script] Creating Realistic Users (1 Manager, 3 Developers)...');
     
-    // Create Manager
+    // Create Manager (Pooja Sharma)
     const manager = await User.create({
-      name: 'Sarah Connor',
+      name: 'Pooja Sharma',
       email: 'manager@workradar.io',
       password: 'Password123!',
       role: 'MANAGER',
@@ -36,9 +36,9 @@ const seedDatabase = async () => {
       weeklyCapacityHours: 40,
     });
 
-    // Create Developers
+    // Create Developers (Ayush, Rahul, Priya)
     const devAyush = await User.create({
-      name: 'Ayush Sharma',
+      name: 'Ayush',
       email: 'ayush@workradar.io',
       password: 'Password123!',
       role: 'EMPLOYEE',
@@ -47,7 +47,7 @@ const seedDatabase = async () => {
     });
 
     const devRahul = await User.create({
-      name: 'Rahul Verma',
+      name: 'Rahul',
       email: 'rahul@workradar.io',
       password: 'Password123!',
       role: 'EMPLOYEE',
@@ -56,7 +56,7 @@ const seedDatabase = async () => {
     });
 
     const devPriya = await User.create({
-      name: 'Priya Patel',
+      name: 'Priya',
       email: 'priya@workradar.io',
       password: 'Password123!',
       role: 'EMPLOYEE',
@@ -231,7 +231,7 @@ const seedDatabase = async () => {
       },
       {
         recipientId: manager._id,
-        title: '📌 Extension Request from Ayush Sharma',
+        title: '📌 Extension Request from Ayush',
         message: 'Requested 3 additional days for "Build Payment Processing Checkout Module".',
         type: 'EXTENSION_REQUEST',
         relatedTaskId: taskPaymentModule._id,
@@ -264,7 +264,7 @@ const seedDatabase = async () => {
     console.log('====================================================');
     console.log('DEMO LOGIN CREDENTIALS:');
     console.log('----------------------------------------------------');
-    console.log('1. Manager:');
+    console.log('1. Manager (Pooja Sharma):');
     console.log('   Email:    manager@workradar.io');
     console.log('   Password: Password123!');
     console.log('');
