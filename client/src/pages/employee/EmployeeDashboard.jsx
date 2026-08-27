@@ -74,7 +74,7 @@ const EmployeeDashboard = () => {
 
         <button
           onClick={() => navigate('/employee/tasks')}
-          className="px-4.5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-2xl text-xs font-extrabold transition flex items-center space-x-2 shadow-md shadow-indigo-200 w-fit"
+          className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold transition flex items-center space-x-2 shadow-xs w-fit"
         >
           <CheckSquare className="w-4 h-4" />
           <span>Manage My Tasks</span>
