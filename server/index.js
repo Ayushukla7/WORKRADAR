@@ -23,7 +23,12 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'],
+  origin: [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'https://workradar-nch5.vercel.app'
+  ],
   credentials: true
 }));
 
@@ -36,8 +41,8 @@ app.get('/', (req, res) => {
     app: 'WorkRadar Predictive REST API',
     status: 'online',
     message: 'Welcome to WorkRadar REST API Server.',
-    frontendAppUrl: 'http://localhost:5173',
-    healthCheckUrl: 'http://localhost:5000/api/health',
+    frontendAppUrl: 'https://workradar-nch5.vercel.app',
+    healthCheckUrl: '/api/health',
     documentation: 'See README.md for complete REST API endpoint specifications.'
   });
 });
@@ -68,5 +73,9 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`[WorkRadar Server] Running on http://localhost:${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  console.log(
+    `[WorkRadar Server] Running on port ${PORT} in ${
+      process.env.NODE_ENV || 'development'
+    } mode`
+  );
 });
