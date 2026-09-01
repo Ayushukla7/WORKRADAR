@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
 import FontSwitcher from './FontSwitcher';
-import { Activity, Bell, LogOut, Search, Check, ShieldAlert, Sparkles, Command } from 'lucide-react';
+import { Activity, Bell, LogOut, Search, Check, ShieldAlert, Sparkles, Command, Menu, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const Navbar = () => {
+const Navbar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
   const { user, logout, isManager } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,28 +55,37 @@ const Navbar = () => {
   };
 
   return (
-    <header className="bg-white/90 backdrop-blur-md border-b border-slate-200 px-6 py-3.5 flex items-center justify-between sticky top-0 z-50 shadow-xs">
-      {/* Brand & Breadcrumbs */}
-      <div className="flex items-center space-x-4">
+    <header className="bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-40 shadow-xs">
+      {/* Brand & Hamburger */}
+      <div className="flex items-center space-x-3">
+        {/* Mobile Hamburger Toggle Button */}
+        <button
+          onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+          className="p-2 text-slate-700 hover:text-slate-900 bg-slate-100 rounded-xl md:hidden transition"
+          aria-label="Toggle Navigation Menu"
+        >
+          {mobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+
         <div
           onClick={() => navigate(isManager ? '/manager/dashboard' : '/employee/dashboard')}
-          className="flex items-center space-x-3 cursor-pointer group"
+          className="flex items-center space-x-2.5 cursor-pointer group"
         >
-          <div className="p-2.5 bg-slate-900 text-white rounded-xl shadow-xs group-hover:bg-slate-800 transition">
+          <div className="p-2 bg-slate-900 text-white rounded-xl shadow-xs group-hover:bg-slate-800 transition">
             <Activity className="w-4 h-4" />
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1.5">
             <span className="text-base font-black tracking-tight text-slate-900">
               WorkRadar
             </span>
-            <span className="text-slate-300 font-mono text-xs">/</span>
-            <span className="text-xs font-bold text-slate-600">{getBreadcrumb()}</span>
+            <span className="text-slate-300 font-mono text-xs hidden sm:inline">/</span>
+            <span className="text-xs font-bold text-slate-600 hidden sm:inline">{getBreadcrumb()}</span>
           </div>
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="hidden md:flex items-center space-x-2 bg-slate-100/90 px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 w-80">
+      {/* Desktop Search Bar */}
+      <div className="hidden lg:flex items-center space-x-2 bg-slate-100/90 px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 w-72 xl:w-80">
         <Search className="w-3.5 h-3.5 text-slate-400" />
         <span className="flex-1 text-slate-400 font-medium">Search tasks or risk scores...</span>
         <kbd className="px-2 py-0.5 bg-white border border-slate-200 rounded-md text-[10px] font-mono text-slate-500 shadow-2xs flex items-center space-x-0.5">
@@ -86,14 +95,14 @@ const Navbar = () => {
       </div>
 
       {/* Right Controls: Font Switcher, Notifications & Profile */}
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 sm:space-x-3">
         <FontSwitcher />
 
         {/* Notification Bell */}
         <div className="relative">
           <button
             onClick={() => setShowNotifDropdown(!showNotifDropdown)}
-            className="p-2.5 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 rounded-xl border border-slate-200 transition relative"
+            className="p-2 sm:p-2.5 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 rounded-xl border border-slate-200 transition relative"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
@@ -105,7 +114,7 @@ const Navbar = () => {
 
           {/* Notifications Drawer */}
           {showNotifDropdown && (
-            <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
+            <div className="absolute right-0 mt-3 w-72 sm:w-96 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
               <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                 <div className="flex items-center space-x-2">
                   <Sparkles className="w-4 h-4 text-slate-900" />
@@ -150,7 +159,7 @@ const Navbar = () => {
         </div>
 
         {/* User Profile Pill */}
-        <div className="flex items-center space-x-3 pl-3 border-l border-slate-200">
+        <div className="flex items-center space-x-2 sm:space-x-3 pl-2 sm:pl-3 border-l border-slate-200">
           <div className="text-right hidden sm:block">
             <p className="text-xs font-extrabold text-slate-900 leading-tight">{user?.name}</p>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{user?.role}</p>
@@ -166,7 +175,7 @@ const Navbar = () => {
               navigate('/login');
             }}
             title="Logout"
-            className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition"
+            className="p-2 sm:p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition"
           >
             <LogOut className="w-4 h-4" />
           </button>
