@@ -73,8 +73,8 @@ const EmployeeDashboard = () => {
       {/* Welcome Banner */}
       <div className="border-b border-slate-200 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold mb-2">
-            <Zap className="w-3.5 h-3.5 fill-indigo-600" />
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-800 text-xs font-semibold mb-2">
+            <span className="w-2 h-2 rounded-full bg-indigo-600" />
             <span>Developer Workspace</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -87,9 +87,9 @@ const EmployeeDashboard = () => {
 
         <button
           onClick={() => navigate('/employee/tasks')}
-          className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center space-x-2 shadow-xs w-fit"
+          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-2 shadow-xs w-fit whitespace-nowrap shrink-0"
         >
-          <CheckSquare className="w-4 h-4" />
+          <CheckSquare className="w-4 h-4 shrink-0" />
           <span>Manage All My Tasks</span>
         </button>
       </div>

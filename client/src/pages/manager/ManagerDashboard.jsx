@@ -114,20 +114,20 @@ const ManagerDashboard = () => {
           </p>
         </div>
 
-        <div className="flex items-center space-x-2.5 sm:space-x-3 flex-wrap">
+        <div className="flex items-center space-x-2 sm:space-x-3 flex-wrap">
           <button
             onClick={() => navigate('/manager/projects')}
-            className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-2xs"
+            className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 shadow-2xs whitespace-nowrap shrink-0"
           >
-            <FolderKanban className="w-4 h-4 text-slate-500" />
+            <FolderKanban className="w-4 h-4 text-slate-500 shrink-0" />
             <span>Projects ({projects.length})</span>
           </button>
 
           <button
             onClick={() => navigate('/manager/tasks')}
-            className="px-4.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-xs"
+            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 shadow-xs whitespace-nowrap shrink-0"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 shrink-0" />
             <span>Create Task</span>
           </button>
         </div>
