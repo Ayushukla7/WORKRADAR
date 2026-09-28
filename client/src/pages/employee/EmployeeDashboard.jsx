@@ -130,11 +130,15 @@ const EmployeeDashboard = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
                     <h3 className="text-sm font-extrabold text-slate-900 leading-snug">{task.title}</h3>
-                    <p className="text-xs text-slate-700 font-semibold mt-0.5">
-                      Project: <strong className="text-slate-900 font-extrabold">{task.projectId?.name || 'N/A'}</strong> • Due:{' '}
-                      <span className="font-mono text-slate-900 font-bold">
-                        {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'N/A'}
-                      </span>
+                    <p className="text-xs text-slate-700 font-semibold mt-0.5 flex items-center flex-wrap gap-1.5">
+                      <span>Project: <strong className="text-slate-900 font-extrabold">{task.projectId?.name || 'N/A'}</strong></span>
+                      <span>•</span>
+                      <span>Due: <strong className="font-mono text-slate-900 font-bold">{task.deadline ? new Date(task.deadline).toLocaleDateString() : 'N/A'}</strong></span>
+                      {Array.isArray(task.assignedTo) && task.assignedTo.length > 1 && (
+                        <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 text-[10px]">
+                          Co-assigned ({task.assignedTo.map((u) => u.name).join(', ')}) • Split Effort: {Math.round((task.estimatedHours / task.assignedTo.length) * 10) / 10}h
+                        </span>
+                      )}
                     </p>
                   </div>
 

@@ -17,11 +17,13 @@ const taskSchema = new mongoose.Schema(
       ref: 'Project',
       required: [true, 'Task must belong to a project'],
     },
-    assignedTo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'Task must be assigned to an employee'],
-    },
+    assignedTo: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: [true, 'Task must be assigned to at least one employee'],
+      },
+    ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

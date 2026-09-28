@@ -124,9 +124,15 @@ const MyTasksPage = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
                 <div>
                   <h3 className="text-base font-bold text-slate-900 leading-tight">{task.title}</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Project: <strong className="text-slate-900">{task.projectId?.name || 'N/A'}</strong> • Priority:{' '}
-                    <strong className="text-slate-900">{task.priority}</strong>
+                  <p className="text-xs text-slate-500 mt-0.5 flex items-center flex-wrap gap-1.5">
+                    <span>Project: <strong className="text-slate-900">{task.projectId?.name || 'N/A'}</strong></span>
+                    <span>•</span>
+                    <span>Priority: <strong className="text-slate-900">{task.priority}</strong></span>
+                    {Array.isArray(task.assignedTo) && task.assignedTo.length > 1 && (
+                      <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 text-[10px]">
+                        Co-assigned ({task.assignedTo.map((u) => u.name).join(', ')}) • Split Effort: {Math.round((task.estimatedHours / task.assignedTo.length) * 10) / 10}h
+                      </span>
+                    )}
                   </p>
                 </div>
 

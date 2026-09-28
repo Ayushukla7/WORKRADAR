@@ -4,7 +4,20 @@ const { calculateTaskRisk } = require('../services/riskEngine');
 const { getEmployeeWorkload } = require('../services/workloadEngine');
 
 /**
- * @desc    Create a new task
+ * Helper to normalize assignedTo input into an array of user IDs
+ */
+const normalizeAssignees = (assignedTo) => {
+  if (Array.isArray(assignedTo)) {
+    return assignedTo.filter(Boolean);
+  }
+  if (assignedTo) {
+    return [assignedTo];
+  }
+  return [];
+};
+
+/**
+ * @desc    Create a new task (supports multiple co-assignees to split workload)
  * @route   POST /api/tasks
  * @access  Private (Manager only)
  */
@@ -22,10 +35,12 @@ const createTask = async (req, res) => {
       dependencies,
     } = req.body;
 
-    if (!title || !projectId || !assignedTo || !deadline) {
+    const assignees = normalizeAssignees(assignedTo);
+
+    if (!title || !projectId || assignees.length === 0 || !deadline) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide title, project, assigned employee, and deadline',
+        message: 'Please provide title, project, at least one assigned employee, and deadline',
       });
     }
 
@@ -44,16 +59,19 @@ const createTask = async (req, res) => {
       dependencyTasks = await Task.find({ _id: { $in: dependencies } });
     }
 
-    // Fetch assignee workload
-    const workloadInfo = await getEmployeeWorkload(assignedTo);
-    const assigneeWorkloadHours = workloadInfo ? workloadInfo.totalEstimatedHours : 0;
+    // Fetch assignees' workloads to evaluate overload risk
+    const workloads = await Promise.all(assignees.map((id) => getEmployeeWorkload(id)));
+    const maxWorkloadHours = workloads.reduce(
+      (max, w) => Math.max(max, w ? w.totalEstimatedHours : 0),
+      0
+    );
 
     // Create preliminary task object for risk calculation
     const draftTask = {
       title,
       description: description || '',
       projectId,
-      assignedTo,
+      assignedTo: assignees,
       priority: priority || 'MEDIUM',
       status: 'TODO',
       progressPercentage: 0,
@@ -64,8 +82,8 @@ const createTask = async (req, res) => {
       isBlocked: false,
     };
 
-    // Calculate initial risk
-    const riskResult = calculateTaskRisk(draftTask, dependencyTasks, assigneeWorkloadHours);
+    // Calculate initial risk using max assignee workload
+    const riskResult = calculateTaskRisk(draftTask, dependencyTasks, maxWorkloadHours);
 
     // Save Task to Database
     const task = await Task.create({
@@ -79,16 +97,18 @@ const createTask = async (req, res) => {
 
     const populatedTask = await Task.findById(task._id)
       .populate('projectId', 'name')
-      .populate('assignedTo', 'name email designation avatarUrl')
+      .populate('assignedTo', 'name email designation avatarUrl weeklyCapacityHours')
       .populate('createdBy', 'name email')
       .populate('dependencies', 'title status riskScore');
+
+    const overloadedMember = workloads.find((w) => w && w.workloadPercentage > 100);
 
     res.status(201).json({
       success: true,
       message: 'Task created successfully',
       task: populatedTask,
-      workloadWarning: workloadInfo && workloadInfo.workloadPercentage > 100
-        ? `Warning: ${workloadInfo.user.name} is currently at ${workloadInfo.workloadPercentage}% capacity`
+      workloadWarning: overloadedMember
+        ? `Warning: ${overloadedMember.user.name} is currently at ${overloadedMember.workloadPercentage}% capacity`
         : null,
     });
   } catch (error) {
@@ -114,7 +134,9 @@ const getTasks = async (req, res) => {
     if (projectId) query.projectId = projectId;
 
     // Filter by assigned user
-    if (assignedTo) query.assignedTo = assignedTo;
+    if (assignedTo) {
+      query.assignedTo = assignedTo;
+    }
 
     // If logged in user is Employee and no specific assignedTo requested, restrict to their tasks
     if (req.user.role === 'EMPLOYEE' && !assignedTo) {
@@ -134,7 +156,7 @@ const getTasks = async (req, res) => {
 
     const tasks = await Task.find(query)
       .populate('projectId', 'name status')
-      .populate('assignedTo', 'name email designation avatarUrl')
+      .populate('assignedTo', 'name email designation avatarUrl weeklyCapacityHours')
       .populate('createdBy', 'name')
       .populate('dependencies', 'title status riskScore')
       .sort({ deadline: 1 });
@@ -147,10 +169,18 @@ const getTasks = async (req, res) => {
           dependencyTasks = task.dependencies;
         }
 
-        const workloadInfo = await getEmployeeWorkload(task.assignedTo?._id);
-        const workloadHours = workloadInfo ? workloadInfo.totalEstimatedHours : 0;
+        // Evaluate max assignee workload
+        const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo].filter(Boolean);
+        let maxWorkload = 0;
+        for (const emp of assignees) {
+          const empId = emp._id || emp;
+          const w = await getEmployeeWorkload(empId);
+          if (w && w.totalEstimatedHours > maxWorkload) {
+            maxWorkload = w.totalEstimatedHours;
+          }
+        }
 
-        const riskResult = calculateTaskRisk(task, dependencyTasks, workloadHours);
+        const riskResult = calculateTaskRisk(task, dependencyTasks, maxWorkload);
 
         // Update database if risk attributes changed
         if (task.riskScore !== riskResult.riskScore || task.riskLevel !== riskResult.riskLevel) {
@@ -199,10 +229,19 @@ const getTaskById = async (req, res) => {
     }
 
     // Recalculate Risk Score
-    const workloadInfo = await getEmployeeWorkload(task.assignedTo?._id);
-    const workloadHours = workloadInfo ? workloadInfo.totalEstimatedHours : 0;
+    const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo].filter(Boolean);
+    let maxWorkload = 0;
+    let primaryWorkloadInfo = null;
+    for (const emp of assignees) {
+      const empId = emp._id || emp;
+      const w = await getEmployeeWorkload(empId);
+      if (!primaryWorkloadInfo) primaryWorkloadInfo = w;
+      if (w && w.totalEstimatedHours > maxWorkload) {
+        maxWorkload = w.totalEstimatedHours;
+      }
+    }
 
-    const riskResult = calculateTaskRisk(task, task.dependencies || [], workloadHours);
+    const riskResult = calculateTaskRisk(task, task.dependencies || [], maxWorkload);
 
     task.riskScore = riskResult.riskScore;
     task.riskLevel = riskResult.riskLevel;
@@ -213,7 +252,7 @@ const getTaskById = async (req, res) => {
     res.status(200).json({
       success: true,
       task,
-      assigneeWorkload: workloadInfo,
+      assigneeWorkload: primaryWorkloadInfo,
     });
   } catch (error) {
     res.status(500).json({
@@ -224,7 +263,7 @@ const getTaskById = async (req, res) => {
 };
 
 /**
- * @desc    Update task details / progress / blocker state
+ * @desc    Update task details / progress / blocker state / assignees
  * @route   PUT /api/tasks/:id
  * @access  Private
  */
@@ -256,7 +295,9 @@ const updateTask = async (req, res) => {
     // Attribute updates
     if (title) task.title = title;
     if (description !== undefined) task.description = description;
-    if (assignedTo) task.assignedTo = assignedTo;
+    if (assignedTo !== undefined) {
+      task.assignedTo = normalizeAssignees(assignedTo);
+    }
     if (priority) task.priority = priority;
     if (estimatedHours) task.estimatedHours = estimatedHours;
     if (deadline) task.deadline = deadline;
@@ -299,10 +340,17 @@ const updateTask = async (req, res) => {
       dependencyTasks = await Task.find({ _id: { $in: task.dependencies } });
     }
 
-    const workloadInfo = await getEmployeeWorkload(task.assignedTo);
-    const workloadHours = workloadInfo ? workloadInfo.totalEstimatedHours : 0;
+    const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo].filter(Boolean);
+    let maxWorkload = 0;
+    for (const emp of assignees) {
+      const empId = emp._id || emp;
+      const w = await getEmployeeWorkload(empId);
+      if (w && w.totalEstimatedHours > maxWorkload) {
+        maxWorkload = w.totalEstimatedHours;
+      }
+    }
 
-    const riskResult = calculateTaskRisk(task, dependencyTasks, workloadHours);
+    const riskResult = calculateTaskRisk(task, dependencyTasks, maxWorkload);
 
     task.riskScore = riskResult.riskScore;
     task.riskLevel = riskResult.riskLevel;
@@ -313,7 +361,7 @@ const updateTask = async (req, res) => {
 
     const updatedTask = await Task.findById(task._id)
       .populate('projectId', 'name')
-      .populate('assignedTo', 'name email designation avatarUrl')
+      .populate('assignedTo', 'name email designation avatarUrl weeklyCapacityHours')
       .populate('createdBy', 'name')
       .populate('dependencies', 'title status riskScore');
 

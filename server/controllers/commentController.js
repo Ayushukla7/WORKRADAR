@@ -33,13 +33,22 @@ const addComment = async (req, res) => {
       text,
     });
 
-    // Notify task assignee or creator if comment is by another user
-    const recipientId =
-      task.assignedTo.toString() === req.user._id.toString()
-        ? task.createdBy
-        : task.assignedTo;
+    // Notify task assignees and creator
+    const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo].filter(Boolean);
+    const recipients = new Set();
 
-    if (recipientId.toString() !== req.user._id.toString()) {
+    if (task.createdBy && task.createdBy.toString() !== req.user._id.toString()) {
+      recipients.add(task.createdBy.toString());
+    }
+
+    for (const assigneeId of assignees) {
+      const aStr = (assigneeId._id || assigneeId).toString();
+      if (aStr !== req.user._id.toString()) {
+        recipients.add(aStr);
+      }
+    }
+
+    for (const recipientId of recipients) {
       await Notification.create({
         recipientId,
         title: '💬 New Task Comment',

@@ -281,7 +281,11 @@ const ManagerDashboard = () => {
                       <p className="text-xs text-slate-600 flex items-center space-x-2 font-semibold flex-wrap">
                         <span>Project: <strong className="text-slate-900">{task.projectId?.name || 'N/A'}</strong></span>
                         <span>•</span>
-                        <span>Assignee: <strong className="text-slate-900 font-bold">{task.assignedTo?.name || 'Unassigned'}</strong></span>
+                        <span>Assignee: <strong className="text-slate-900 font-bold">
+                          {Array.isArray(task.assignedTo) && task.assignedTo.length > 0
+                            ? task.assignedTo.map((u) => u.name).join(', ')
+                            : task.assignedTo?.name || 'Unassigned'}
+                        </strong></span>
                       </p>
 
                       {/* Diagnostic Snippet */}
