@@ -3,14 +3,14 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
   LayoutDashboard,
-  ShieldAlert,
+  AlertTriangle,
   FolderKanban,
   CheckSquare,
   Users,
   BarChart3,
   Clock,
   UserCheck,
-  Zap,
+  Radar,
   X
 } from 'lucide-react';
 
@@ -30,7 +30,7 @@ const Sidebar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
       title: 'OVERVIEW',
       links: [
         { to: '/manager/dashboard', label: 'Command Center', icon: LayoutDashboard },
-        { to: '/manager/risk-center', label: 'Risk Radar', icon: ShieldAlert, badge: 'AI' },
+        { to: '/manager/risk-center', label: 'Risk Radar', icon: AlertTriangle },
       ],
     },
     {
@@ -83,7 +83,7 @@ const Sidebar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
       <aside
         className={`
           fixed md:static top-0 left-0 bottom-0 z-50 md:z-auto
-          w-64 bg-white border-r border-slate-200/90 flex flex-col justify-between p-4 shrink-0 min-h-screen md:min-h-[calc(100vh-57px)]
+          w-64 bg-white border-r border-slate-200 flex flex-col justify-between p-4 shrink-0 min-h-screen md:min-h-[calc(100vh-57px)]
           transform transition-transform duration-300 ease-in-out shadow-xl md:shadow-none
           ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
@@ -137,11 +137,6 @@ const Sidebar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
                           <Icon className="w-4 h-4 shrink-0" />
                           <span>{link.label}</span>
                         </div>
-                        {link.badge && (
-                          <span className="text-[9px] font-mono font-bold bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded border border-indigo-200">
-                            {link.badge}
-                          </span>
-                        )}
                       </NavLink>
                     );
                   })}
@@ -154,11 +149,11 @@ const Sidebar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
         {/* Footer Brand Banner */}
         <div className="bg-slate-900 text-white p-3.5 rounded-2xl space-y-1 shadow-xs mt-6 md:mt-0">
           <div className="flex items-center space-x-1.5 font-bold text-xs text-slate-100">
-            <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-            <span>WorkRadar Engine</span>
+            <Radar className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            <span>WorkRadar Workspace</span>
           </div>
-          <p className="text-[10px] text-slate-300 leading-relaxed font-medium">
-            AI-driven delay forecasting & workload capacity balancing.
+          <p className="text-[10px] text-slate-400 leading-relaxed font-medium">
+            Predictive delay forecasting & workload capacity balancing.
           </p>
         </div>
       </aside>

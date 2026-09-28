@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, ShieldAlert, ArrowRight, BarChart3, Clock, AlertTriangle, Sparkles } from 'lucide-react';
+import { Radar, ShieldAlert, ArrowRight, BarChart3, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const LandingPage = () => {
@@ -19,14 +19,14 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f5fa] text-slate-900 flex flex-col font-sans selection:bg-slate-900 selection:text-white">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-slate-900 selection:text-white">
       {/* Navigation Bar */}
       <nav className="border-b border-slate-200 bg-white/90 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-2xs">
         <div className="flex items-center space-x-2.5 cursor-pointer" onClick={() => navigate('/')}>
           <div className="p-2 bg-slate-900 text-white rounded-xl shadow-xs">
-            <Activity className="w-4 h-4" />
+            <Radar className="w-4 h-4 text-indigo-400" />
           </div>
-          <span className="text-lg font-black tracking-tight text-slate-900">WorkRadar</span>
+          <span className="text-lg font-extrabold tracking-tight text-slate-900">WorkRadar</span>
         </div>
 
         <div className="flex items-center space-x-3">
@@ -48,8 +48,8 @@ const LandingPage = () => {
 
       {/* Main Container */}
       <section className="py-16 px-6 max-w-4xl mx-auto text-center flex-1 flex flex-col items-center justify-center space-y-8">
-        <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold">
-          <ShieldAlert className="w-4 h-4 text-rose-600" />
+        <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-800 text-xs font-semibold">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
           <span>Predictive Task & Workforce Management</span>
         </div>
 
@@ -66,9 +66,9 @@ const LandingPage = () => {
 
         {/* 1-Click Demo Login Box */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm w-full max-w-md space-y-4">
-          <div className="flex items-center justify-center space-x-1.5 text-xs font-black text-slate-900 uppercase tracking-wider">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <span>1-Click Instant Demo Login</span>
+          <div className="flex items-center justify-center space-x-1.5 text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+            <CheckCircle2 className="w-4 h-4 text-indigo-600" />
+            <span>Instant Demo Login</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

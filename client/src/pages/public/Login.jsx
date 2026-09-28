@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { Activity, Lock, Mail, ArrowRight, AlertCircle, Sparkles } from 'lucide-react';
+import { Radar, Lock, Mail, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const Login = () => {
   const { login } = useAuth();
@@ -52,16 +52,16 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center py-12 px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <div
           onClick={() => navigate('/')}
           className="inline-flex items-center justify-center p-3 bg-slate-900 text-white rounded-xl shadow-xs mb-4 cursor-pointer"
         >
-          <Activity className="w-6 h-6" />
+          <Radar className="w-6 h-6 text-indigo-400" />
         </div>
         <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Sign in to WorkRadar</h2>
-        <p className="mt-1 text-xs text-slate-500">Predictive Task & Workforce Management</p>
+        <p className="mt-1 text-xs text-slate-500 font-medium">Predictive Task & Workforce Management</p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -116,9 +116,9 @@ const Login = () => {
 
           {/* Quick Demo Credentials Box */}
           <div className="mt-8 pt-6 border-t border-slate-200">
-            <div className="flex items-center space-x-1 text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>One-Click Seed Accounts</span>
+            <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
+              <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
+              <span>One-Click Demo Accounts</span>
             </div>
 
             <div className="space-y-2">

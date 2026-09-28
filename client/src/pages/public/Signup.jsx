@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { Activity, Lock, Mail, User, Briefcase, Clock, ArrowRight, AlertCircle } from 'lucide-react';
+import { Radar, Lock, Mail, User, Briefcase, Clock, ArrowRight, AlertCircle } from 'lucide-react';
 
 const Signup = () => {
   const { signup } = useAuth();
@@ -43,16 +43,16 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center py-12 px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <div
           onClick={() => navigate('/')}
           className="inline-flex items-center justify-center p-3 bg-slate-900 text-white rounded-xl shadow-xs mb-4 cursor-pointer"
         >
-          <Activity className="w-6 h-6" />
+          <Radar className="w-6 h-6 text-indigo-400" />
         </div>
         <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Create WorkRadar Account</h2>
-        <p className="mt-1 text-xs text-slate-500">Join your team on WorkRadar</p>
+        <p className="mt-1 text-xs text-slate-500 font-medium">Join your team on WorkRadar</p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

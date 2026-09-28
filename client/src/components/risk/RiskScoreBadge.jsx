@@ -1,40 +1,37 @@
 import React from 'react';
-import { AlertTriangle, AlertCircle, ShieldAlert, ShieldCheck } from 'lucide-react';
 
-const RiskScoreBadge = ({ score = 0, level = 'LOW', showIcon = true, size = 'md' }) => {
-  let bgColor = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
-  let Icon = ShieldCheck;
-  let label = 'LOW RISK';
+const RiskScoreBadge = ({ score = 0, level = 'LOW', size = 'md' }) => {
+  let badgeStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+  let dotColor = 'bg-emerald-500';
+  let label = 'Low Risk';
 
   if (score >= 85 || level === 'CRITICAL') {
-    bgColor = 'bg-rose-600 text-white border-rose-500 shadow-md shadow-rose-600/30 animate-pulse';
-    Icon = ShieldAlert;
-    label = 'CRITICAL RISK';
+    badgeStyle = 'bg-rose-50 text-rose-700 border-rose-200';
+    dotColor = 'bg-rose-500';
+    label = 'Critical';
   } else if (score >= 65 || level === 'HIGH') {
-    bgColor = 'bg-rose-500/20 text-rose-400 border-rose-500/40';
-    Icon = AlertTriangle;
-    label = 'HIGH RISK';
+    badgeStyle = 'bg-orange-50 text-orange-700 border-orange-200';
+    dotColor = 'bg-orange-500';
+    label = 'High Risk';
   } else if (score >= 35 || level === 'MEDIUM') {
-    bgColor = 'bg-amber-500/20 text-amber-400 border-amber-500/40';
-    Icon = AlertCircle;
-    label = 'MEDIUM RISK';
+    badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
+    dotColor = 'bg-amber-500';
+    label = 'Medium';
   }
 
   const sizeClasses = {
-    sm: 'px-2.5 py-0.5 text-[10px]',
-    md: 'px-3 py-1 text-xs font-black',
-    lg: 'px-4 py-1.5 text-xs font-black tracking-wide',
-  }[size] || 'px-3 py-1 text-xs';
+    sm: 'px-2 py-0.5 text-[11px]',
+    md: 'px-2.5 py-1 text-xs',
+    lg: 'px-3 py-1.5 text-xs',
+  }[size] || 'px-2.5 py-1 text-xs';
 
   return (
     <span
-      className={`inline-flex items-center space-x-1.5 rounded-full border ${bgColor} ${sizeClasses}`}
+      className={`inline-flex items-center space-x-1.5 rounded-lg border font-semibold ${badgeStyle} ${sizeClasses}`}
     >
-      {showIcon && <Icon className="w-3.5 h-3.5 shrink-0" />}
+      <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
       <span>{label}</span>
-      <span className="font-mono bg-black px-2 py-0.2 rounded-full border border-neutral-700 text-[10px] font-black text-lime-400">
-        {score}/100
-      </span>
+      <span className="font-mono text-[11px] opacity-75 font-bold">({score}%)</span>
     </span>
   );
 };

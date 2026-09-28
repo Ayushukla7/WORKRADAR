@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
-import { Activity, Bell, LogOut, Search, Check, ShieldAlert, Sparkles, Command, Menu, X } from 'lucide-react';
+import { Radar, Bell, LogOut, Search, Check, AlertCircle, Command, Menu, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Navbar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
@@ -46,7 +46,7 @@ const Navbar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
     const path = location.pathname;
     if (path.includes('risk-center')) return 'Risk Center';
     if (path.includes('projects')) return 'Projects';
-    if (path.includes('tasks')) return 'Tasks & Projects';
+    if (path.includes('tasks')) return 'Tasks & Sprints';
     if (path.includes('workload')) return 'Team Capacity';
     if (path.includes('extensions')) return 'Blockers & Requests';
     if (path.includes('team')) return 'Team Roster';
@@ -54,7 +54,7 @@ const Navbar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
   };
 
   return (
-    <header className="bg-white border-b border-slate-200/90 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-40 shadow-xs">
+    <header className="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-40 shadow-xs">
       {/* Brand & Mobile Hamburger */}
       <div className="flex items-center space-x-3">
         <button
@@ -69,8 +69,8 @@ const Navbar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
           onClick={() => navigate(isManager ? '/manager/dashboard' : '/employee/dashboard')}
           className="flex items-center space-x-2.5 cursor-pointer group"
         >
-          <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-xs group-hover:bg-indigo-700 transition">
-            <Activity className="w-4 h-4" />
+          <div className="p-2 bg-slate-900 text-white rounded-xl shadow-xs group-hover:bg-slate-800 transition">
+            <Radar className="w-4 h-4 text-indigo-400" />
           </div>
           <div className="flex items-center space-x-2">
             <span className="text-base font-extrabold tracking-tight text-slate-900">
@@ -83,9 +83,9 @@ const Navbar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
       </div>
 
       {/* Global Search Bar */}
-      <div className="hidden lg:flex items-center space-x-2 bg-slate-100/90 px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 w-72 xl:w-80">
+      <div className="hidden lg:flex items-center space-x-2 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 w-72 xl:w-80">
         <Search className="w-3.5 h-3.5 text-slate-400" />
-        <span className="flex-1 text-slate-400 font-medium">Quick search tasks or risk alerts...</span>
+        <span className="flex-1 text-slate-400 font-medium">Search tasks or projects...</span>
         <kbd className="px-2 py-0.5 bg-white border border-slate-200 rounded-md text-[10px] font-mono text-slate-500 shadow-2xs flex items-center space-x-0.5">
           <Command className="w-2.5 h-2.5" />
           <span>K</span>
@@ -98,7 +98,7 @@ const Navbar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
         <div className="relative">
           <button
             onClick={() => setShowNotifDropdown(!showNotifDropdown)}
-            className="p-2 sm:p-2.5 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 rounded-xl border border-slate-200 transition relative"
+            className="p-2 sm:p-2.5 text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition relative"
             title="Notifications"
           >
             <Bell className="w-4 h-4" />
@@ -114,7 +114,7 @@ const Navbar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
             <div className="absolute right-0 mt-3 w-72 sm:w-96 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
               <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                 <div className="flex items-center space-x-2">
-                  <Sparkles className="w-4 h-4 text-indigo-600" />
+                  <Bell className="w-4 h-4 text-slate-700" />
                   <span className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Notifications</span>
                 </div>
                 {unreadCount > 0 && (
@@ -134,11 +134,11 @@ const Navbar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
                     <div
                       key={notif._id}
                       className={`p-4 text-xs transition ${
-                        notif.isRead ? 'bg-white opacity-70' : 'bg-slate-50 border-l-4 border-indigo-600'
+                        notif.isRead ? 'bg-white opacity-70' : 'bg-slate-50 border-l-4 border-slate-900'
                       }`}
                     >
                       <p className="font-bold text-slate-900 flex items-center space-x-1.5 mb-1">
-                        {notif.type === 'RISK_ALERT' && <ShieldAlert className="w-3.5 h-3.5 text-rose-600 shrink-0" />}
+                        {notif.type === 'RISK_ALERT' && <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />}
                         <span>{notif.title}</span>
                       </p>
                       <p className="text-slate-600 text-[11px] leading-relaxed">{notif.message}</p>
@@ -159,7 +159,7 @@ const Navbar = ({ mobileSidebarOpen, setMobileSidebarOpen }) => {
         <div className="flex items-center space-x-2 sm:space-x-3 pl-2 sm:pl-3 border-l border-slate-200">
           <div className="text-right hidden sm:block">
             <p className="text-xs font-extrabold text-slate-900 leading-tight">{user?.name}</p>
-            <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">{user?.role}</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{user?.role}</p>
           </div>
 
           <div className="w-8 h-8 rounded-xl bg-slate-900 text-white font-extrabold flex items-center justify-center text-xs shadow-xs">
