@@ -376,13 +376,13 @@ const ManagerDashboard = () => {
               onClick={() => navigate('/manager/projects')}
               className="bg-white border border-slate-200/90 hover:border-slate-300 p-5 rounded-2xl cursor-pointer transition shadow-2xs space-y-3"
             >
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-extrabold text-slate-900 truncate">{p.name}</h3>
-                <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-sm font-extrabold text-slate-900 leading-snug">{p.name}</h3>
+                <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 shrink-0">
                   {p.status}
                 </span>
               </div>
-              <p className="text-xs text-slate-600 line-clamp-1">{p.description || 'No description provided.'}</p>
+              <p className="text-xs text-slate-600 leading-relaxed">{p.description || 'No description provided.'}</p>
               
               <div className="space-y-1.5 pt-1">
                 <div className="flex justify-between text-xs text-slate-600 font-semibold">

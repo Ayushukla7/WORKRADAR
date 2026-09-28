@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { FolderKanban, Plus, RefreshCw, Calendar, Users, CheckCircle2, X } from 'lucide-react';
+import { Plus, RefreshCw, Calendar, Users, CheckCircle2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const ProjectsPage = () => {
@@ -78,7 +78,7 @@ const ProjectsPage = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
@@ -93,30 +93,30 @@ const ProjectsPage = () => {
           className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center space-x-2 shadow-xs w-fit"
         >
           <Plus className="w-4 h-4" />
-          <span>Create New Project</span>
+          <span>Create Project</span>
         </button>
       </div>
 
       {/* Projects Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
         {projects.length > 0 ? (
           projects.map((project) => (
             <div
               key={project._id}
-              className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-5"
+              className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-4"
             >
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-extrabold text-slate-900 leading-tight">{project.name}</h3>
-                  <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900 leading-snug">{project.name}</h3>
+                  <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 shrink-0">
                     {project.status}
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">{project.description}</p>
+                <p className="text-xs text-slate-600 leading-relaxed">{project.description || 'No description provided.'}</p>
               </div>
 
               {/* Progress Bar & Key Counts */}
-              <div className="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              <div className="space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-600 font-semibold">Completion Progress</span>
                   <span className="font-mono text-slate-900 font-bold">{project.completionPercentage}%</span>
@@ -128,24 +128,24 @@ const ProjectsPage = () => {
                   ></div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 pt-2 text-center text-xs border-t border-slate-200 mt-2">
+                <div className="grid grid-cols-3 gap-2 pt-2.5 text-center text-xs border-t border-slate-200 mt-2">
                   <div>
-                    <span className="text-[10px] text-slate-500 block">Total Tasks</span>
-                    <span className="font-mono text-slate-900 font-bold">{project.totalTasks}</span>
+                    <span className="text-[11px] text-slate-500 block">Total Tasks</span>
+                    <span className="font-mono text-slate-900 font-bold text-sm">{project.totalTasks}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 block">Completed</span>
-                    <span className="font-mono text-emerald-700 font-bold">{project.completedTasks}</span>
+                    <span className="text-[11px] text-slate-500 block">Completed</span>
+                    <span className="font-mono text-emerald-700 font-bold text-sm">{project.completedTasks}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 block">At Risk</span>
-                    <span className="font-mono text-rose-700 font-bold">{project.atRiskTasks}</span>
+                    <span className="text-[11px] text-slate-500 block">At Risk</span>
+                    <span className="font-mono text-rose-700 font-bold text-sm">{project.atRiskTasks}</span>
                   </div>
                 </div>
               </div>
 
               {/* Footer info & Team Members */}
-              <div className="flex items-center justify-between text-xs text-slate-600 pt-2 border-t border-slate-200">
+              <div className="flex items-center justify-between text-xs text-slate-600 pt-3 border-t border-slate-100">
                 <div className="flex items-center space-x-1.5">
                   <Users className="w-4 h-4 text-slate-400" />
                   <span>{project.teamMembers?.length || 0} Team Members</span>
@@ -161,8 +161,8 @@ const ProjectsPage = () => {
             </div>
           ))
         ) : (
-          <div className="col-span-2 p-12 text-center text-slate-500 bg-white rounded-2xl border border-slate-200">
-            No projects created yet. Click "Create New Project" above.
+          <div className="col-span-2 p-12 text-center text-slate-500 bg-white rounded-2xl border border-slate-200 font-medium">
+            No projects created yet. Click "Create Project" above to get started.
           </div>
         )}
       </div>
@@ -172,11 +172,8 @@ const ProjectsPage = () => {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 sm:space-y-5 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
-                <FolderKanban className="w-5 h-5 text-slate-900" />
-                <span>Create New Project</span>
-              </h3>
-              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-900">
+              <h3 className="text-base font-bold text-slate-900">Create New Project</h3>
+              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-900 p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -190,7 +187,7 @@ const ProjectsPage = () => {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Fintech Payment Integration"
-                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-slate-900"
+                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900"
                 />
               </div>
 
@@ -201,7 +198,7 @@ const ProjectsPage = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Brief overview of project goals..."
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-slate-900"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900"
                 />
               </div>
 

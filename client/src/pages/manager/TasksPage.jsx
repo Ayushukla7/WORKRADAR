@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import RiskScoreBadge from '../../components/risk/RiskScoreBadge';
-import { CheckSquare, Plus, RefreshCw, AlertTriangle, Search, X, Users, CheckCircle2, Zap } from 'lucide-react';
+import { Plus, RefreshCw, AlertTriangle, Search, X, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const TasksPage = () => {
@@ -104,7 +104,7 @@ const TasksPage = () => {
     return (
       <div className="py-20 flex items-center justify-center space-x-3 text-slate-500">
         <RefreshCw className="w-5 h-5 animate-spin text-slate-900" />
-        <span className="text-sm font-medium">Loading task schedule...</span>
+        <span className="text-sm font-medium">Loading tasks...</span>
       </div>
     );
   }
@@ -113,13 +113,13 @@ const TasksPage = () => {
   const splitHours = Math.round((formData.estimatedHours / assigneeCount) * 10) / 10;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Task Operations</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Tasks & Sprints</h1>
           <p className="text-xs text-slate-500 mt-1">
-            Create tasks, co-assign multiple employees to split workload, and track delay risks.
+            Create tasks, co-assign team members, track progress velocity, and inspect delay risk scores.
           </p>
         </div>
 
@@ -128,7 +128,7 @@ const TasksPage = () => {
           className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center space-x-2 shadow-xs w-fit"
         >
           <Plus className="w-4 h-4" />
-          <span>Create New Task</span>
+          <span>Create Task</span>
         </button>
       </div>
 
@@ -140,17 +140,17 @@ const TasksPage = () => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Filter tasks by name..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-900"
+            placeholder="Search task title..."
+            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900"
           />
         </div>
 
-        <div className="flex items-center space-x-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+        <div className="flex items-center space-x-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
           {['ALL', 'TODO', 'IN_PROGRESS', 'BLOCKED', 'COMPLETED'].map((status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition shrink-0 ${
                 statusFilter === status
                   ? 'bg-slate-900 text-white shadow-2xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -165,16 +165,16 @@ const TasksPage = () => {
       {/* Task List Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+          <table className="w-full text-left text-xs min-w-[850px]">
+            <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider text-[11px]">
               <tr>
-                <th className="p-4">Task Name</th>
-                <th className="p-4">Project</th>
-                <th className="p-4">Assignee(s)</th>
-                <th className="p-4">Progress</th>
-                <th className="p-4">Priority</th>
-                <th className="p-4">Deadline</th>
-                <th className="p-4">Delay Risk</th>
+                <th className="p-4 min-w-[240px]">Task Name</th>
+                <th className="p-4 whitespace-nowrap">Project</th>
+                <th className="p-4 min-w-[180px]">Assignee(s)</th>
+                <th className="p-4 whitespace-nowrap">Progress</th>
+                <th className="p-4 whitespace-nowrap">Priority</th>
+                <th className="p-4 whitespace-nowrap">Deadline</th>
+                <th className="p-4 whitespace-nowrap text-right pr-6">Delay Risk</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -185,56 +185,56 @@ const TasksPage = () => {
                     <tr
                       key={task._id}
                       onClick={() => navigate(`/manager/tasks/${task._id}`)}
-                      className="hover:bg-slate-50 cursor-pointer transition"
+                      className="hover:bg-slate-50/80 cursor-pointer transition"
                     >
                       <td className="p-4">
-                        <div className="font-bold text-slate-900 text-sm hover:text-slate-700 transition">
+                        <div className="font-bold text-slate-900 text-sm hover:text-indigo-600 transition leading-snug">
                           {task.title}
                         </div>
                         {task.isBlocked && (
-                          <div className="text-[10px] text-amber-800 font-semibold flex items-center space-x-1 mt-0.5">
-                            <AlertTriangle className="w-3 h-3 text-amber-600" />
-                            <span>BLOCKED: {task.blockerReason || 'Unspecified'}</span>
+                          <div className="text-[11px] text-amber-800 font-semibold flex items-center space-x-1 mt-1">
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                            <span>BLOCKED: {task.blockerReason || 'Reason not specified'}</span>
                           </div>
                         )}
                       </td>
 
-                      <td className="p-4 font-medium text-slate-700">
-                        {task.projectId?.name || 'N/A'}
+                      <td className="p-4 font-semibold text-slate-700 whitespace-nowrap">
+                        {task.projectId?.name || '—'}
                       </td>
 
                       <td className="p-4">
-                        <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                        <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
                           {assignees.length > 0 ? (
                             assignees.map((assignee, idx) => (
                               <div
                                 key={assignee._id || idx}
-                                className="inline-flex items-center space-x-1 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200"
+                                className="inline-flex items-center space-x-1.5 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 text-[11px] font-medium text-slate-800 whitespace-nowrap"
                               >
-                                <div className="w-4 h-4 rounded-full bg-slate-900 text-white font-bold text-[9px] flex items-center justify-center">
+                                <span className="w-4 h-4 rounded-full bg-slate-800 text-white font-bold text-[9px] flex items-center justify-center shrink-0">
                                   {assignee.name ? assignee.name.charAt(0) : 'U'}
-                                </div>
-                                <span className="font-semibold text-slate-900 text-[11px]">{assignee.name}</span>
+                                </span>
+                                <span>{assignee.name}</span>
                               </div>
                             ))
                           ) : (
                             <span className="text-slate-400 font-medium">Unassigned</span>
                           )}
                           {assignees.length > 1 && (
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-                              Split ({Math.round((task.estimatedHours / assignees.length) * 10) / 10}h each)
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 whitespace-nowrap">
+                              {Math.round((task.estimatedHours / assignees.length) * 10) / 10}h / person
                             </span>
                           )}
                         </div>
                       </td>
 
-                      <td className="p-4 font-mono font-bold text-slate-900">
+                      <td className="p-4 font-mono font-bold text-slate-900 whitespace-nowrap">
                         {task.progressPercentage}%
                       </td>
 
-                      <td className="p-4">
+                      <td className="p-4 whitespace-nowrap">
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
                             task.priority === 'CRITICAL'
                               ? 'bg-rose-100 text-rose-800 border border-rose-200'
                               : task.priority === 'HIGH'
@@ -246,11 +246,11 @@ const TasksPage = () => {
                         </span>
                       </td>
 
-                      <td className="p-4 font-mono text-slate-700">
+                      <td className="p-4 font-mono text-slate-700 whitespace-nowrap">
                         {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'N/A'}
                       </td>
 
-                      <td className="p-4">
+                      <td className="p-4 text-right pr-6 whitespace-nowrap">
                         <RiskScoreBadge score={task.riskScore} level={task.riskLevel} size="sm" />
                       </td>
                     </tr>
@@ -258,7 +258,7 @@ const TasksPage = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-500">
+                  <td colSpan={7} className="p-10 text-center text-slate-500 font-medium">
                     No tasks found matching your filter criteria.
                   </td>
                 </tr>
@@ -273,11 +273,8 @@ const TasksPage = () => {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-slate-200 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
-                <CheckSquare className="w-5 h-5 text-slate-900" />
-                <span>Create New Task</span>
-              </h3>
-              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-900">
+              <h3 className="text-base font-bold text-slate-900">Create New Task</h3>
+              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-900 p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -290,8 +287,8 @@ const TasksPage = () => {
                   required
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g. Build Payment Processing Checkout Module"
-                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-slate-900"
+                  placeholder="e.g. Build Payment Gateway Checkout Module"
+                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900"
                 />
               </div>
 
@@ -318,9 +315,8 @@ const TasksPage = () => {
                   <label className="block font-semibold text-slate-700">
                     Assign Employees ({formData.assignedTo.length} selected)
                   </label>
-                  <span className="text-[10px] text-indigo-700 font-bold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 flex items-center space-x-1">
-                    <Zap className="w-3 h-3" />
-                    <span>Select 2+ to split workload</span>
+                  <span className="text-[10px] text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                    Select 2+ to split workload
                   </span>
                 </div>
 
@@ -333,11 +329,11 @@ const TasksPage = () => {
                         onClick={() => toggleAssignee(u._id)}
                         className={`p-2 rounded-lg cursor-pointer border transition flex items-center justify-between ${
                           isSelected
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                            ? 'bg-slate-900 text-white border-slate-900'
                             : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
                         }`}
                       >
-                        <div className="truncate">
+                        <div className="overflow-hidden">
                           <span className="font-semibold text-xs truncate block">{u.name}</span>
                           <span className={`text-[10px] block truncate ${isSelected ? 'text-slate-300' : 'text-slate-400'}`}>
                             {u.designation || u.role}
@@ -353,8 +349,8 @@ const TasksPage = () => {
                   <div className="mt-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center space-x-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>
-                      <strong>Workload Split Active:</strong> {formData.estimatedHours} total hours will be split into{' '}
-                      <strong>{splitHours} hours each</strong> across {formData.assignedTo.length} team members!
+                      <strong>Effort Split:</strong> {formData.estimatedHours} hrs split into{' '}
+                      <strong>{splitHours} hrs / person</strong> across {formData.assignedTo.length} assignees.
                     </span>
                   </div>
                 )}
@@ -407,7 +403,7 @@ const TasksPage = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Task instructions and expected deliverables..."
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-slate-900"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900"
                 />
               </div>
 
@@ -423,7 +419,7 @@ const TasksPage = () => {
                   type="submit"
                   className="px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition font-bold shadow-xs"
                 >
-                  Create & Balance Workload
+                  Create Task
                 </button>
               </div>
             </form>

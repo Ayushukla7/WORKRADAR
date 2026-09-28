@@ -143,9 +143,9 @@ const WorkloadAnalyticsPage = () => {
                     w.activeTasks.map((t) => (
                       <div
                         key={t._id}
-                        className="p-2 bg-slate-50 rounded border border-slate-200 text-[11px] text-slate-800 flex justify-between items-center"
+                        className="p-2 bg-slate-50 rounded border border-slate-200 text-[11px] text-slate-800 flex justify-between items-center gap-2"
                       >
-                        <span className="truncate max-w-[160px] font-semibold">{t.title}</span>
+                        <span className="font-semibold text-slate-800">{t.title}</span>
                         <span className="font-mono text-slate-900 font-bold shrink-0">{t.estimatedHours}h</span>
                       </div>
                     ))
