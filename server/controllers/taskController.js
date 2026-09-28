@@ -1,5 +1,6 @@
 const Task = require('../models/Task');
 const Project = require('../models/Project');
+const Notification = require('../models/Notification');
 const { calculateTaskRisk } = require('../services/riskEngine');
 const { getEmployeeWorkload } = require('../services/workloadEngine');
 
@@ -126,7 +127,7 @@ const createTask = async (req, res) => {
  */
 const getTasks = async (req, res) => {
   try {
-    const { projectId, assignedTo, status, riskLevel, search } = req.query;
+    const { projectId, assignedTo, status, riskLevel, search, completionRequested } = req.query;
 
     let query = {};
 
@@ -146,6 +147,11 @@ const getTasks = async (req, res) => {
     // Filter by status
     if (status) query.status = status;
 
+    // Filter by completion requested
+    if (completionRequested === 'true') {
+      query.completionRequested = true;
+    }
+
     // Filter by risk level
     if (riskLevel) query.riskLevel = riskLevel;
 
@@ -157,13 +163,18 @@ const getTasks = async (req, res) => {
     const tasks = await Task.find(query)
       .populate('projectId', 'name status')
       .populate('assignedTo', 'name email designation avatarUrl weeklyCapacityHours')
-      .populate('createdBy', 'name')
+      .populate('createdBy', 'name email')
+      .populate('completionReviewedBy', 'name email')
       .populate('dependencies', 'title status riskScore')
       .sort({ deadline: 1 });
 
     // Recalculate risk on the fly to keep scores 100% current
     const updatedTasks = await Promise.all(
       tasks.map(async (task) => {
+        if (task.status === 'COMPLETED') {
+          return task;
+        }
+
         let dependencyTasks = [];
         if (task.dependencies && task.dependencies.length > 0) {
           dependencyTasks = task.dependencies;
@@ -219,6 +230,7 @@ const getTaskById = async (req, res) => {
       .populate('projectId', 'name description targetEndDate')
       .populate('assignedTo', 'name email designation avatarUrl weeklyCapacityHours')
       .populate('createdBy', 'name email designation')
+      .populate('completionReviewedBy', 'name email')
       .populate('dependencies', 'title status progressPercentage riskScore deadline');
 
     if (!task) {
@@ -228,31 +240,37 @@ const getTaskById = async (req, res) => {
       });
     }
 
-    // Recalculate Risk Score
-    const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo].filter(Boolean);
-    let maxWorkload = 0;
-    let primaryWorkloadInfo = null;
-    for (const emp of assignees) {
-      const empId = emp._id || emp;
-      const w = await getEmployeeWorkload(empId);
-      if (!primaryWorkloadInfo) primaryWorkloadInfo = w;
-      if (w && w.totalEstimatedHours > maxWorkload) {
-        maxWorkload = w.totalEstimatedHours;
+    if (task.status !== 'COMPLETED') {
+      const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo].filter(Boolean);
+      let maxWorkload = 0;
+      let primaryWorkloadInfo = null;
+      for (const emp of assignees) {
+        const empId = emp._id || emp;
+        const w = await getEmployeeWorkload(empId);
+        if (!primaryWorkloadInfo) primaryWorkloadInfo = w;
+        if (w && w.totalEstimatedHours > maxWorkload) {
+          maxWorkload = w.totalEstimatedHours;
+        }
       }
+
+      const riskResult = calculateTaskRisk(task, task.dependencies || [], maxWorkload);
+
+      task.riskScore = riskResult.riskScore;
+      task.riskLevel = riskResult.riskLevel;
+      task.riskFactors = riskResult.riskFactors;
+      task.recommendedAction = riskResult.recommendedAction;
+      await task.save();
+
+      return res.status(200).json({
+        success: true,
+        task,
+        assigneeWorkload: primaryWorkloadInfo,
+      });
     }
-
-    const riskResult = calculateTaskRisk(task, task.dependencies || [], maxWorkload);
-
-    task.riskScore = riskResult.riskScore;
-    task.riskLevel = riskResult.riskLevel;
-    task.riskFactors = riskResult.riskFactors;
-    task.recommendedAction = riskResult.recommendedAction;
-    await task.save();
 
     res.status(200).json({
       success: true,
       task,
-      assigneeWorkload: primaryWorkloadInfo,
     });
   } catch (error) {
     res.status(500).json({
@@ -309,6 +327,9 @@ const updateTask = async (req, res) => {
       if (task.progressPercentage === 100) {
         task.status = 'COMPLETED';
         task.isBlocked = false;
+        task.completionRequested = false;
+        task.riskScore = 0;
+        task.riskLevel = 'LOW';
       }
     }
 
@@ -318,6 +339,9 @@ const updateTask = async (req, res) => {
       if (status === 'COMPLETED') {
         task.progressPercentage = 100;
         task.isBlocked = false;
+        task.completionRequested = false;
+        task.riskScore = 0;
+        task.riskLevel = 'LOW';
       } else if (status === 'BLOCKED') {
         task.isBlocked = true;
       }
@@ -352,10 +376,12 @@ const updateTask = async (req, res) => {
 
     const riskResult = calculateTaskRisk(task, dependencyTasks, maxWorkload);
 
-    task.riskScore = riskResult.riskScore;
-    task.riskLevel = riskResult.riskLevel;
-    task.riskFactors = riskResult.riskFactors;
-    task.recommendedAction = riskResult.recommendedAction;
+    if (task.status !== 'COMPLETED') {
+      task.riskScore = riskResult.riskScore;
+      task.riskLevel = riskResult.riskLevel;
+      task.riskFactors = riskResult.riskFactors;
+      task.recommendedAction = riskResult.recommendedAction;
+    }
 
     await task.save();
 
@@ -374,6 +400,144 @@ const updateTask = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Server error updating task',
+    });
+  }
+};
+
+/**
+ * @desc    Request task completion approval from manager
+ * @route   POST /api/tasks/:id/request-completion
+ * @access  Private (Employee / Assignee)
+ */
+const requestCompletion = async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: 'Task not found',
+      });
+    }
+
+    const { completionNote } = req.body;
+
+    task.status = 'IN_REVIEW';
+    task.completionRequested = true;
+    task.completionNote = completionNote || 'Task completed by developer. Awaiting manager review.';
+    task.completionRequestedAt = new Date();
+    task.progressPercentage = 100;
+    task.isBlocked = false;
+
+    await task.save();
+
+    // Send notification to task creator / manager
+    if (task.createdBy) {
+      await Notification.create({
+        recipientId: task.createdBy,
+        title: 'Task Completion Request',
+        message: `${req.user.name} finished "${task.title}" and requested completion approval.`,
+        type: 'COMPLETION_REQUEST',
+        relatedTaskId: task._id,
+        relatedProjectId: task.projectId,
+      });
+    }
+
+    const populatedTask = await Task.findById(task._id)
+      .populate('projectId', 'name')
+      .populate('assignedTo', 'name email designation avatarUrl')
+      .populate('createdBy', 'name email');
+
+    res.status(200).json({
+      success: true,
+      message: 'Task completion request sent to your manager for approval.',
+      task: populatedTask,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error requesting completion approval',
+    });
+  }
+};
+
+/**
+ * @desc    Manager review task completion (Approve or Reject/Request Changes)
+ * @route   PUT /api/tasks/:id/review-completion
+ * @access  Private (Manager only)
+ */
+const reviewCompletion = async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: 'Task not found',
+      });
+    }
+
+    const { approved, feedback } = req.body;
+
+    if (approved) {
+      task.status = 'COMPLETED';
+      task.progressPercentage = 100;
+      task.isBlocked = false;
+      task.completionRequested = false;
+      task.riskScore = 0;
+      task.riskLevel = 'LOW';
+      task.completionReviewedBy = req.user._id;
+      task.completionFeedback = feedback || 'Approved by manager';
+
+      await task.save();
+
+      // Notify all assignees
+      const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo].filter(Boolean);
+      for (const aId of assignees) {
+        await Notification.create({
+          recipientId: aId._id || aId,
+          title: 'Task Completion Approved',
+          message: `Manager ${req.user.name} approved completion for "${task.title}". Great work!`,
+          type: 'COMPLETION_RESPONSE',
+          relatedTaskId: task._id,
+          relatedProjectId: task.projectId,
+        });
+      }
+    } else {
+      task.status = 'IN_PROGRESS';
+      task.completionRequested = false;
+      task.completionReviewedBy = req.user._id;
+      task.completionFeedback = feedback || 'Changes requested by manager';
+
+      await task.save();
+
+      // Notify all assignees
+      const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo].filter(Boolean);
+      for (const aId of assignees) {
+        await Notification.create({
+          recipientId: aId._id || aId,
+          title: 'Task Changes Requested',
+          message: `Manager ${req.user.name} reviewed "${task.title}" and requested updates: "${feedback || 'Please review requirements.'}"`,
+          type: 'COMPLETION_RESPONSE',
+          relatedTaskId: task._id,
+          relatedProjectId: task.projectId,
+        });
+      }
+    }
+
+    const populatedTask = await Task.findById(task._id)
+      .populate('projectId', 'name')
+      .populate('assignedTo', 'name email designation avatarUrl')
+      .populate('createdBy', 'name email')
+      .populate('completionReviewedBy', 'name email');
+
+    res.status(200).json({
+      success: true,
+      message: approved ? 'Task completion approved successfully.' : 'Task returned to in-progress with feedback.',
+      task: populatedTask,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error reviewing task completion',
     });
   }
 };
@@ -412,5 +576,7 @@ module.exports = {
   getTasks,
   getTaskById,
   updateTask,
+  requestCompletion,
+  reviewCompletion,
   deleteTask,
 };

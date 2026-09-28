@@ -78,6 +78,25 @@ const taskSchema = new mongoose.Schema(
       enum: ['DEPENDENCY', 'TECHNICAL', 'MANAGER_APPROVAL', 'EXTERNAL', 'SPECIFICATION', 'OTHER', 'NONE'],
       default: 'NONE',
     },
+    completionRequested: {
+      type: Boolean,
+      default: false,
+    },
+    completionNote: {
+      type: String,
+      default: '',
+    },
+    completionRequestedAt: {
+      type: Date,
+    },
+    completionReviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    completionFeedback: {
+      type: String,
+      default: '',
+    },
     riskScore: {
       type: Number,
       min: 0,

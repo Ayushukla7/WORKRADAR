@@ -7,16 +7,11 @@ import {
   CheckCircle2,
   AlertTriangle,
   BarChart3,
-  ArrowUpRight,
-  TrendingUp,
   RefreshCw,
   Plus,
-  Activity,
   FolderKanban,
-  Users,
   CheckSquare,
   Clock,
-  Zap,
   ArrowRight
 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
@@ -32,6 +27,7 @@ const ManagerDashboard = () => {
     blocked: 0,
   });
   const [atRiskTasks, setAtRiskTasks] = useState([]);
+  const [pendingCompletionsCount, setPendingCompletionsCount] = useState(0);
   const [projects, setProjects] = useState([]);
   const [teamWorkload, setTeamWorkload] = useState([]);
 
@@ -58,6 +54,8 @@ const ManagerDashboard = () => {
 
       if (tasksRes.data.success) {
         setAtRiskTasks(tasksRes.data.tasks.slice(0, 5));
+        const completions = tasksRes.data.tasks.filter((t) => t.completionRequested || t.status === 'IN_REVIEW');
+        setPendingCompletionsCount(completions.length);
       }
 
       if (projectsRes.data.success) {
@@ -133,6 +131,33 @@ const ManagerDashboard = () => {
         </div>
       </div>
 
+      {/* Pending Completion Approval Alert Banner (if any) */}
+      {pendingCompletionsCount > 0 && (
+        <div
+          onClick={() => navigate('/manager/extensions')}
+          className="p-4 bg-indigo-50 border border-indigo-200 rounded-2xl cursor-pointer hover:bg-indigo-100/70 transition flex items-center justify-between gap-3 shadow-2xs"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-xs">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-indigo-950">
+                {pendingCompletionsCount} Task Completion {pendingCompletionsCount === 1 ? 'Submission' : 'Submissions'} Awaiting Your Approval!
+              </p>
+              <p className="text-[11px] text-indigo-700 font-medium">
+                Developers have submitted finished tasks for review. Click to inspect deliverables and approve.
+              </p>
+            </div>
+          </div>
+
+          <span className="text-xs font-bold text-indigo-700 hover:text-indigo-900 flex items-center space-x-1 shrink-0 whitespace-nowrap">
+            <span>Review Submissions</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </span>
+        </div>
+      )}
+
       {/* KPI Stats Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         <div
@@ -163,7 +188,7 @@ const ManagerDashboard = () => {
           </div>
           <div>
             <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 font-mono">{summary.completed}</p>
-            <p className="text-[11px] text-emerald-700 mt-0.5 font-medium">{overallCompletionRate}% total completion rate</p>
+            <p className="text-[11px] text-emerald-700 mt-0.5 font-medium">{overallCompletionRate}% completion rate</p>
           </div>
         </div>
 
@@ -188,14 +213,14 @@ const ManagerDashboard = () => {
           className="bg-white border border-slate-200/90 hover:border-amber-300 p-4 sm:p-5 rounded-2xl cursor-pointer transition shadow-2xs space-y-2 group"
         >
           <div className="flex items-center justify-between text-slate-500">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-800">Active Blockers</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-800">Pending Approvals</span>
             <div className="p-2 bg-amber-50 text-amber-700 rounded-xl group-hover:bg-amber-600 group-hover:text-white transition">
-              <AlertTriangle className="w-4 h-4" />
+              <Clock className="w-4 h-4" />
             </div>
           </div>
           <div>
-            <p className="text-2xl sm:text-3xl font-extrabold text-amber-600 font-mono">{summary.blocked}</p>
-            <p className="text-[11px] text-amber-800 mt-0.5 font-medium">Blocked dependencies</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-amber-600 font-mono">{pendingCompletionsCount + summary.blocked}</p>
+            <p className="text-[11px] text-amber-800 mt-0.5 font-medium">{pendingCompletionsCount} completions • {summary.blocked} blockers</p>
           </div>
         </div>
       </div>
@@ -239,6 +264,11 @@ const ManagerDashboard = () => {
                           {task.isBlocked && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-200">
                               BLOCKED
+                            </span>
+                          )}
+                          {task.completionRequested && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 border border-indigo-200">
+                              COMPLETION REQUESTED
                             </span>
                           )}
                         </div>

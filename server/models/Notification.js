@@ -23,6 +23,8 @@ const notificationSchema = new mongoose.Schema(
         'DEADLINE_APPROACHING',
         'EXTENSION_REQUEST',
         'EXTENSION_RESPONSE',
+        'COMPLETION_REQUEST',
+        'COMPLETION_RESPONSE',
         'BLOCKER_LOGGED',
         'TASK_UPDATED',
       ],
