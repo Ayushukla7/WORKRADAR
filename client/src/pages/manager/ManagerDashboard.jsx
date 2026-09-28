@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import RiskScoreBadge from '../../components/risk/RiskScoreBadge';
-import TiltCard3D from '../../components/common/TiltCard3D';
 import { useNavigate } from 'react-router-dom';
 import {
   ShieldAlert,
@@ -12,7 +11,13 @@ import {
   TrendingUp,
   RefreshCw,
   Plus,
-  Activity
+  Activity,
+  FolderKanban,
+  Users,
+  CheckSquare,
+  Clock,
+  Zap,
+  ArrowRight
 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
 
@@ -28,7 +33,7 @@ const ManagerDashboard = () => {
   });
   const [atRiskTasks, setAtRiskTasks] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [workloadData, setWorkloadData] = useState([]);
+  const [teamWorkload, setTeamWorkload] = useState([]);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -60,13 +65,7 @@ const ManagerDashboard = () => {
       }
 
       if (workloadRes.data.success) {
-        const chartData = workloadRes.data.teamWorkload.map((w) => ({
-          name: w.user.name.split(' ')[0],
-          workload: w.workloadPercentage,
-          status: w.status,
-          hours: w.totalEstimatedHours,
-        }));
-        setWorkloadData(chartData);
+        setTeamWorkload(workloadRes.data.teamWorkload || []);
       }
     } catch (error) {
       console.error('Error loading manager dashboard:', error);
@@ -81,43 +80,52 @@ const ManagerDashboard = () => {
 
   if (loading) {
     return (
-      <div className="py-20 flex items-center justify-center space-x-3 text-slate-500">
-        <RefreshCw className="w-5 h-5 animate-spin text-slate-900" />
-        <span className="text-sm font-bold">Calculating WorkRadar Delay Radar...</span>
+      <div className="py-24 flex flex-col items-center justify-center space-y-3 text-slate-500">
+        <RefreshCw className="w-6 h-6 animate-spin text-indigo-600" />
+        <span className="text-sm font-bold text-slate-700">Loading WorkRadar Command Center...</span>
       </div>
     );
   }
 
-  // Calculate Overall Completion Percentage for Circular Gauge
+  const chartData = teamWorkload.map((w) => ({
+    name: w.user.name.split(' ')[0],
+    workload: w.workloadPercentage,
+    status: w.status,
+    hours: w.totalEstimatedHours,
+  }));
+
   const overallTotal = summary.totalActive + summary.completed;
-  const overallCompletionRate = overallTotal > 0 ? Math.round((summary.completed / overallTotal) * 100) : 78;
+  const overallCompletionRate = overallTotal > 0 ? Math.round((summary.completed / overallTotal) * 100) : 0;
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Header Banner */}
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-900 text-xs font-bold mb-2">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold mb-2">
             <Activity className="w-3.5 h-3.5" />
-            <span>WorkRadar AI Delay Radar</span>
+            <span>AI Delay Radar Active</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Executive Command Center</h1>
-          <p className="text-xs text-slate-600 font-bold mt-1">
-            Real-time workforce health monitoring — forecasting delays before deadlines arrive.
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Executive Command Center
+          </h1>
+          <p className="text-xs text-slate-600 font-medium mt-1">
+            Real-time workforce health monitoring, proactive delay risk alerts, and workload balancing.
           </p>
         </div>
 
         <div className="flex items-center space-x-2.5 sm:space-x-3 flex-wrap">
           <button
-            onClick={() => navigate('/manager/risk-center')}
-            className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-extrabold transition flex items-center space-x-2 shadow-2xs"
+            onClick={() => navigate('/manager/projects')}
+            className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-2xs"
           >
-            <ShieldAlert className="w-4 h-4 text-rose-600" />
-            <span>Open Risk Center</span>
+            <FolderKanban className="w-4 h-4 text-slate-500" />
+            <span>Projects ({projects.length})</span>
           </button>
+
           <button
             onClick={() => navigate('/manager/tasks')}
-            className="px-4.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold transition flex items-center space-x-1.5 shadow-xs"
+            className="px-4.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-xs"
           >
             <Plus className="w-4 h-4" />
             <span>Create Task</span>
@@ -125,228 +133,211 @@ const ManagerDashboard = () => {
         </div>
       </div>
 
-      {/* Stats Counter Bar Section */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl text-center space-y-1 shadow-2xs">
-          <span className="text-2xl sm:text-3xl font-black text-slate-900 font-mono">{summary.totalActive}</span>
-          <span className="text-[10px] text-slate-500 font-black uppercase tracking-wider block">Active Tasks</span>
+      {/* KPI Stats Strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+        <div
+          onClick={() => navigate('/manager/tasks')}
+          className="bg-white border border-slate-200/90 hover:border-slate-300 p-4 sm:p-5 rounded-2xl cursor-pointer transition shadow-2xs space-y-2 group"
+        >
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-wider">Active Tasks</span>
+            <div className="p-2 bg-slate-100 rounded-xl text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition">
+              <CheckSquare className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono">{summary.totalActive}</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">In flight across all projects</p>
+          </div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl text-center space-y-1 shadow-2xs">
-          <span className="text-2xl sm:text-3xl font-black text-emerald-600 font-mono">{summary.completed}</span>
-          <span className="text-[10px] text-slate-500 font-black uppercase tracking-wider block">Completed Tasks</span>
+        <div
+          onClick={() => navigate('/manager/tasks')}
+          className="bg-white border border-slate-200/90 hover:border-slate-300 p-4 sm:p-5 rounded-2xl cursor-pointer transition shadow-2xs space-y-2 group"
+        >
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-wider">Completed</span>
+            <div className="p-2 bg-emerald-50 text-emerald-700 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 font-mono">{summary.completed}</p>
+            <p className="text-[11px] text-emerald-700 mt-0.5 font-medium">{overallCompletionRate}% total completion rate</p>
+          </div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl text-center space-y-1 shadow-2xs">
-          <span className="text-2xl sm:text-3xl font-black text-rose-600 font-mono">{summary.atRisk}</span>
-          <span className="text-[10px] text-slate-500 font-black uppercase tracking-wider block">High Risk Delays</span>
+        <div
+          onClick={() => navigate('/manager/risk-center')}
+          className="bg-white border border-slate-200/90 hover:border-rose-300 p-4 sm:p-5 rounded-2xl cursor-pointer transition shadow-2xs space-y-2 group"
+        >
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-wider text-rose-700">High Risk Delays</span>
+            <div className="p-2 bg-rose-50 text-rose-700 rounded-xl group-hover:bg-rose-600 group-hover:text-white transition">
+              <ShieldAlert className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl sm:text-3xl font-extrabold text-rose-600 font-mono">{summary.atRisk}</p>
+            <p className="text-[11px] text-rose-700 mt-0.5 font-medium">Require manager attention</p>
+          </div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl text-center space-y-1 shadow-2xs">
-          <span className="text-2xl sm:text-3xl font-black text-amber-600 font-mono">{summary.blocked}</span>
-          <span className="text-[10px] text-slate-500 font-black uppercase tracking-wider block">Active Blockers</span>
+        <div
+          onClick={() => navigate('/manager/extensions')}
+          className="bg-white border border-slate-200/90 hover:border-amber-300 p-4 sm:p-5 rounded-2xl cursor-pointer transition shadow-2xs space-y-2 group"
+        >
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-800">Active Blockers</span>
+            <div className="p-2 bg-amber-50 text-amber-700 rounded-xl group-hover:bg-amber-600 group-hover:text-white transition">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl sm:text-3xl font-extrabold text-amber-600 font-mono">{summary.blocked}</p>
+            <p className="text-[11px] text-amber-800 mt-0.5 font-medium">Blocked dependencies</p>
+          </div>
         </div>
       </div>
 
-      {/* Top Section: Progress Ring Gauge + Key Metric Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Circular SVG Progress Ring Card */}
-        <TiltCard3D className="lg:col-span-4 bg-white border border-slate-200 p-6 rounded-2xl flex flex-col justify-between items-center text-center shadow-xs">
-          <p className="text-xs font-black text-slate-500 uppercase tracking-widest self-start">Overall Task Progress</p>
-          
-          <div className="relative my-4 flex items-center justify-center">
-            <svg className="w-32 h-32 sm:w-36 sm:h-36 transform -rotate-90">
-              <circle
-                cx="72"
-                cy="72"
-                r="56"
-                stroke="#e2e8f0"
-                strokeWidth="10"
-                fill="transparent"
-              />
-              <circle
-                cx="72"
-                cy="72"
-                r="56"
-                stroke="url(#slateGradient)"
-                strokeWidth="10"
-                strokeDasharray="352"
-                strokeDashoffset={352 - (352 * overallCompletionRate) / 100}
-                strokeLinecap="round"
-                fill="transparent"
-                className="transition-all duration-1000 ease-out"
-              />
-              <defs>
-                <linearGradient id="slateGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#0f172a" />
-                  <stop offset="100%" stopColor="#334155" />
-                </linearGradient>
-              </defs>
-            </svg>
-
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tracking-tight">{overallCompletionRate}%</span>
-              <span className="text-[10px] font-black text-slate-600 uppercase tracking-wider">Complete</span>
-            </div>
-          </div>
-
-          <div className="w-full grid grid-cols-2 gap-2 text-xs border-t border-slate-100 pt-3 font-bold">
-            <div className="text-left">
-              <span className="text-[10px] text-slate-500 block uppercase font-black">Completed</span>
-              <span className="font-mono text-emerald-600 font-extrabold text-sm">{summary.completed} Tasks</span>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] text-slate-500 block uppercase font-black">Active</span>
-              <span className="font-mono text-slate-900 font-extrabold text-sm">{summary.totalActive} Tasks</span>
-            </div>
-          </div>
-        </TiltCard3D>
-
-        {/* 3 Metric Cards Grid */}
-        <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <TiltCard3D className="bg-white border border-slate-200 p-5 rounded-2xl flex flex-col justify-between shadow-2xs">
-            <div className="p-3 bg-rose-50 text-rose-700 rounded-xl w-fit mb-3 border border-rose-200">
-              <ShieldAlert className="w-5 h-5 text-rose-600" />
-            </div>
-            <div>
-              <p className="text-3xl font-black text-rose-600 font-mono">{summary.atRisk}</p>
-              <p className="text-xs font-black text-slate-900 mt-1">High Risk Tasks</p>
-              <p className="text-[11px] text-slate-500 font-bold mt-0.5">Require immediate manager action</p>
-            </div>
-          </TiltCard3D>
-
-          <TiltCard3D className="bg-white border border-slate-200 p-5 rounded-2xl flex flex-col justify-between shadow-2xs">
-            <div className="p-3 bg-amber-50 text-amber-700 rounded-xl w-fit mb-3 border border-amber-200">
-              <AlertTriangle className="w-5 h-5 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-3xl font-black text-amber-600 font-mono">{summary.blocked}</p>
-              <p className="text-xs font-black text-slate-900 mt-1">Active Blockers</p>
-              <p className="text-[11px] text-slate-500 font-bold mt-0.5">Logged dependency blockers</p>
-            </div>
-          </TiltCard3D>
-
-          <TiltCard3D className="bg-white border border-slate-200 p-5 rounded-2xl flex flex-col justify-between shadow-2xs">
-            <div className="p-3 bg-slate-100 text-slate-900 rounded-xl w-fit mb-3 border border-slate-200">
-              <TrendingUp className="w-5 h-5 text-slate-900" />
-            </div>
-            <div>
-              <p className="text-3xl font-black text-slate-900 font-mono">{projects.length}</p>
-              <p className="text-xs font-black text-slate-900 mt-1">Active Projects</p>
-              <p className="text-[11px] text-slate-500 font-bold mt-0.5">On-schedule milestones</p>
-            </div>
-          </TiltCard3D>
-        </div>
-      </div>
-
-      {/* Main 2-Column Section */}
+      {/* Main 2-Column Overview Section */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-        {/* Left Column (7 cols): What Needs My Attention? List */}
+        {/* Left Column (7 cols): Urgent Attention Center */}
         <div className="lg:col-span-7 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-black text-slate-900 flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
               <ShieldAlert className="w-4 h-4 text-rose-600" />
-              <span>What Needs My Attention Right Now?</span>
-            </h2>
+              <h2 className="text-base font-extrabold text-slate-900">Urgent Action Center</h2>
+            </div>
             <button
               onClick={() => navigate('/manager/risk-center')}
-              className="text-xs font-extrabold text-slate-900 hover:underline flex items-center space-x-1"
+              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1"
             >
-              <span>View All Risk Scores</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <span>View Risk Radar</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+          <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
             {atRiskTasks.length > 0 ? (
               <div className="divide-y divide-slate-100">
-                {atRiskTasks.map((task) => (
-                  <div
-                    key={task._id}
-                    onClick={() => navigate(`/manager/tasks/${task._id}`)}
-                    className="p-4 sm:p-5 hover:bg-slate-50/80 cursor-pointer transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4"
-                  >
-                    <div className="space-y-1.5 flex-1">
-                      <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-                        <span className="text-sm font-black text-slate-900 hover:text-slate-700 transition">
-                          {task.title}
-                        </span>
-                        {task.isBlocked && (
-                          <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-200">
-                            BLOCKED
+                {atRiskTasks.map((task) => {
+                  const assignees = Array.isArray(task.assignedTo)
+                    ? task.assignedTo
+                    : [task.assignedTo].filter(Boolean);
+                  return (
+                    <div
+                      key={task._id}
+                      onClick={() => navigate(`/manager/tasks/${task._id}`)}
+                      className="p-4 sm:p-5 hover:bg-slate-50/80 cursor-pointer transition flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    >
+                      <div className="space-y-1.5 flex-1">
+                        <div className="flex items-center space-x-2 flex-wrap gap-1">
+                          <span className="text-sm font-bold text-slate-900 hover:text-indigo-600 transition">
+                            {task.title}
                           </span>
+                          {task.isBlocked && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-200">
+                              BLOCKED
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-xs text-slate-600 flex items-center space-x-2 flex-wrap font-medium">
+                          <span>Project: <strong className="text-slate-900">{task.projectId?.name || 'N/A'}</strong></span>
+                          <span>•</span>
+                          <span>Assignee(s): <strong className="text-slate-900 font-bold">
+                            {assignees.map((u) => u.name).join(', ') || 'Unassigned'}
+                          </strong></span>
+                        </p>
+
+                        {task.riskFactors && task.riskFactors.length > 0 && (
+                          <p className="text-xs text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-lg border border-rose-200 w-fit font-mono font-medium">
+                            ⚠️ {task.riskFactors[0]}
+                          </p>
                         )}
                       </div>
 
-                      <p className="text-xs text-slate-600 flex items-center space-x-2 font-semibold flex-wrap">
-                        <span>Project: <strong className="text-slate-900">{task.projectId?.name || 'N/A'}</strong></span>
-                        <span>•</span>
-                        <span>Assignee: <strong className="text-slate-900 font-bold">
-                          {Array.isArray(task.assignedTo) && task.assignedTo.length > 0
-                            ? task.assignedTo.map((u) => u.name).join(', ')
-                            : task.assignedTo?.name || 'Unassigned'}
-                        </strong></span>
-                      </p>
-
-                      {/* Diagnostic Snippet */}
-                      {task.riskFactors && task.riskFactors.length > 0 && (
-                        <p className="text-xs text-rose-700 bg-rose-50 px-3 py-1 rounded-lg border border-rose-200 w-fit font-mono font-semibold">
-                          ⚠️ {task.riskFactors[0]}
-                        </p>
-                      )}
+                      <div className="flex items-center space-x-3 shrink-0 self-end sm:self-center">
+                        <RiskScoreBadge score={task.riskScore} level={task.riskLevel} size="sm" />
+                      </div>
                     </div>
-
-                    <div className="flex items-center space-x-3 shrink-0 self-end sm:self-center">
-                      <RiskScoreBadge score={task.riskScore} level={task.riskLevel} />
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
-              <div className="p-8 sm:p-10 text-center text-xs text-slate-500 font-semibold">
+              <div className="p-10 text-center text-xs text-slate-500 font-medium">
                 <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-                <span>Zero high-risk task delays detected across active projects!</span>
+                <span>Zero delay risks detected! All active tasks are on schedule.</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Column (5 cols): Smooth Slate Gradient Area Chart */}
+        {/* Right Column (5 cols): Live Team Capacity Radar */}
         <div className="lg:col-span-5 space-y-4">
-          <h2 className="text-base font-black text-slate-900 flex items-center space-x-2">
-            <BarChart3 className="w-4 h-4 text-slate-900" />
-            <span>Team Workload Distribution</span>
-          </h2>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <BarChart3 className="w-4 h-4 text-slate-900" />
+              <h2 className="text-base font-extrabold text-slate-900">Team Capacity Radar</h2>
+            </div>
+            <button
+              onClick={() => navigate('/manager/workload')}
+              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1"
+            >
+              <span>Detailed Workload</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 space-y-4 shadow-2xs">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-slate-700 font-bold">Capacity Utilized % per Employee</p>
-              <span className="text-[10px] font-bold font-mono px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200">
-                LIVE METRICS
-              </span>
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-2xs">
+            {/* Horizontal Mini Workload Bars */}
+            <div className="space-y-3">
+              {teamWorkload.slice(0, 4).map((w) => {
+                const isOver = w.workloadPercentage > 100;
+                return (
+                  <div key={w.user._id} className="space-y-1 text-xs">
+                    <div className="flex justify-between font-semibold">
+                      <span className="text-slate-800">{w.user.name}</span>
+                      <span className={`font-mono font-bold ${isOver ? 'text-rose-600' : 'text-slate-900'}`}>
+                        {w.workloadPercentage}% ({w.totalEstimatedHours}h)
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                      <div
+                        className={`h-2 rounded-full transition-all duration-500 ${
+                          isOver ? 'bg-rose-600' : w.workloadPercentage > 75 ? 'bg-indigo-600' : 'bg-emerald-600'
+                        }`}
+                        style={{ width: `${Math.min(100, w.workloadPercentage)}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
-            <div className="h-52 sm:h-56 w-full">
+            {/* Quick Chart */}
+            <div className="h-40 w-full pt-2 border-t border-slate-100">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={workloadData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="workloadSlateGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0f172a" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#0f172a" stopOpacity={0.0} />
+                    <linearGradient id="dashboardCapacityGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="name" stroke="#64748b" fontSize={11} fontWeight={700} />
-                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} unit="%" />
+                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} fontWeight={600} />
+                  <YAxis stroke="#94a3b8" fontSize={10} fontWeight={600} unit="%" />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', color: '#ffffff', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)' }}
+                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '10px', fontSize: '11px', fontWeight: 'bold', color: '#ffffff' }}
                   />
                   <Area
                     type="monotone"
                     dataKey="workload"
-                    stroke="#0f172a"
-                    strokeWidth={3}
+                    stroke="#4f46e5"
+                    strokeWidth={2.5}
                     fillOpacity={1}
-                    fill="url(#workloadSlateGradient)"
+                    fill="url(#dashboardCapacityGrad)"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -354,11 +345,59 @@ const ManagerDashboard = () => {
 
             <button
               onClick={() => navigate('/manager/workload')}
-              className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition shadow-xs uppercase tracking-wider"
+              className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition shadow-xs"
             >
-              Analyze Full Team Workload Capacity
+              Rebalance Team Workload
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Projects Portfolio Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <FolderKanban className="w-4 h-4 text-slate-900" />
+            <h2 className="text-base font-extrabold text-slate-900">Active Projects Portfolio</h2>
+          </div>
+          <button
+            onClick={() => navigate('/manager/projects')}
+            className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1"
+          >
+            <span>All Projects</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {projects.map((p) => (
+            <div
+              key={p._id}
+              onClick={() => navigate('/manager/projects')}
+              className="bg-white border border-slate-200/90 hover:border-slate-300 p-5 rounded-2xl cursor-pointer transition shadow-2xs space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-extrabold text-slate-900 truncate">{p.name}</h3>
+                <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">
+                  {p.status}
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 line-clamp-1">{p.description || 'No description provided.'}</p>
+              
+              <div className="space-y-1.5 pt-1">
+                <div className="flex justify-between text-xs text-slate-600 font-semibold">
+                  <span>Progress</span>
+                  <span className="font-mono text-slate-900 font-bold">{p.completionPercentage}%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-slate-900 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${p.completionPercentage}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

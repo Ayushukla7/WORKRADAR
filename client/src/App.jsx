@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { FontProvider } from './context/FontContext';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
 
@@ -27,45 +26,43 @@ import MyWorkloadPage from './pages/employee/MyWorkloadPage';
 
 function App() {
   return (
-    <FontProvider>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
 
-            {/* Protected Manager Routes */}
-            <Route element={<ProtectedRoute allowedRoles={['MANAGER']} />}>
-              <Route element={<AppLayout />}>
-                <Route path="/manager/dashboard" element={<ManagerDashboard />} />
-                <Route path="/manager/risk-center" element={<RiskCenterPage />} />
-                <Route path="/manager/projects" element={<ProjectsPage />} />
-                <Route path="/manager/tasks" element={<TasksPage />} />
-                <Route path="/manager/tasks/:id" element={<TaskDetailsManagerPage />} />
-                <Route path="/manager/workload" element={<WorkloadAnalyticsPage />} />
-                <Route path="/manager/extensions" element={<ExtensionsPage />} />
-                <Route path="/manager/team" element={<TeamPage />} />
-              </Route>
+          {/* Protected Manager Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['MANAGER']} />}>
+            <Route element={<AppLayout />}>
+              <Route path="/manager/dashboard" element={<ManagerDashboard />} />
+              <Route path="/manager/risk-center" element={<RiskCenterPage />} />
+              <Route path="/manager/projects" element={<ProjectsPage />} />
+              <Route path="/manager/tasks" element={<TasksPage />} />
+              <Route path="/manager/tasks/:id" element={<TaskDetailsManagerPage />} />
+              <Route path="/manager/workload" element={<WorkloadAnalyticsPage />} />
+              <Route path="/manager/extensions" element={<ExtensionsPage />} />
+              <Route path="/manager/team" element={<TeamPage />} />
             </Route>
+          </Route>
 
-            {/* Protected Employee Routes */}
-            <Route element={<ProtectedRoute allowedRoles={['EMPLOYEE']} />}>
-              <Route element={<AppLayout />}>
-                <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
-                <Route path="/employee/tasks" element={<MyTasksPage />} />
-                <Route path="/employee/workload" element={<MyWorkloadPage />} />
-                <Route path="/employee/extensions" element={<ExtensionsPage />} />
-              </Route>
+          {/* Protected Employee Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['EMPLOYEE']} />}>
+            <Route element={<AppLayout />}>
+              <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
+              <Route path="/employee/tasks" element={<MyTasksPage />} />
+              <Route path="/employee/workload" element={<MyWorkloadPage />} />
+              <Route path="/employee/extensions" element={<ExtensionsPage />} />
             </Route>
+          </Route>
 
-            {/* Catch All Redirect */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </FontProvider>
+          {/* Catch All Redirect */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
